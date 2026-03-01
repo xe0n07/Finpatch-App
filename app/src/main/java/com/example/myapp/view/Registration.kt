@@ -1,7 +1,6 @@
-package myApp.view
+package com.example.myapp.view
 
 import android.app.DatePickerDialog
-import android.content.Context
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -10,7 +9,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -48,16 +47,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.myApp.viewmodel.UserViewModel
 import com.example.myapp.R
+import com.example.myapp.model.UserModel
+import com.example.myapp.repository.UserRepoImpl
 
 import com.example.myapp.ui.theme.Blue
 import com.example.myapp.ui.theme.Purple80
 import com.example.myapp.ui.theme.White
-import myApp.model.UserModel
-import myApp.repository.UserRepoImpl
-//import com.google.firebase.auth.FirebaseAuth
-import myApp.view.ui.theme.Application_1Theme
-import myApp.viewmodel.UserViewModel
 import java.util.Calendar
 
 class Registration : ComponentActivity() {
@@ -88,11 +85,11 @@ fun RegistrationBody() {
 
     var selectedDate by remember { mutableStateOf("") }
 
-    val datepicker = DatePickerDialog(
-        context, { _, y, m, d ->
+    val datepicker = remember {
+        DatePickerDialog(context, { _, y, m, d ->
             selectedDate = "$d/${m + 1}/$y"
-        }, year, month, day
-    )
+        }, year, month, day)
+    }
 
     Scaffold { padding ->
         Column(
@@ -104,7 +101,7 @@ fun RegistrationBody() {
         ) {
             Spacer(modifier = Modifier.height(40.dp))
             Image(
-                painter = painterResource(id = com.example.myapp.R.drawable.logo),
+                painter = painterResource(id = com.example.myapp.R.drawable.logo2),
                 contentDescription = "Finance Manager Logo",
                 modifier = Modifier.size(80.dp)
             )
@@ -148,26 +145,50 @@ fun RegistrationBody() {
                     .padding(horizontal = 15.dp)
             )
             Spacer(modifier = Modifier.height(20.dp))
-            OutlinedTextField(
-                value = selectedDate,
-                onValueChange = { selectedDate = it },
-                label = { Text("Date of Birth") },
-                placeholder = { Text("dd/mm/yyyy") },
-                enabled = false,
-                colors = TextFieldDefaults.colors(
-                    disabledContainerColor = Purple80,
-                    disabledIndicatorColor = Color.Transparent,
-                    unfocusedContainerColor = Purple80,
-                    focusedContainerColor = Purple80,
-                    focusedIndicatorColor = Blue,
-                    unfocusedIndicatorColor = Color.Transparent
-                ),
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { datepicker.show() }
-                    .padding(horizontal = 15.dp)
-            )
+            Box(modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 15.dp)
+                .clickable { datepicker.show() }
+            ) {
+                OutlinedTextField(
+                    value = selectedDate,
+                    onValueChange = { selectedDate = it },
+                    label = { Text("Date of Birth") },
+                    placeholder = { Text("dd/mm/yyyy") },
+                    enabled = false,
+                    colors = TextFieldDefaults.colors(
+                        disabledContainerColor = Purple80,
+                        disabledIndicatorColor = Color.Transparent,
+                        unfocusedContainerColor = Purple80,
+                        focusedContainerColor = Purple80,
+                        focusedIndicatorColor = Blue,
+                        unfocusedIndicatorColor = Color.Transparent
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
+            }
+//            OutlinedTextField(
+//                value = selectedDate,
+//                onValueChange = { selectedDate = it },
+//                label = { Text("Date of Birth") },
+//                placeholder = { Text("dd/mm/yyyy") },
+//                enabled = false,
+//                colors = TextFieldDefaults.colors(
+//                    disabledContainerColor = Purple80,
+//                    disabledIndicatorColor = Color.Transparent,
+//                    unfocusedContainerColor = Purple80,
+//                    focusedContainerColor = Purple80,
+//                    focusedIndicatorColor = Blue,
+//                    unfocusedIndicatorColor = Color.Transparent
+//                ),
+//                shape = RoundedCornerShape(12.dp),
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .clickable { datepicker.show() }
+//                    .padding(horizontal = 15.dp)
+//            )
 
             Spacer(modifier = Modifier.height(20.dp))
             OutlinedTextField(
@@ -230,11 +251,8 @@ fun RegistrationBody() {
                         if(success){
                             val model = UserModel(
                                 id = userId,
-                                firstName = "",
-                                lastName = "",
+                                dob = selectedDate,
                                 email = email,
-                                gender = "",
-                                dob = selectedDate
                             )
                             userViewModel.addUserToDatabase(userId,model){
                                     success,message ->
@@ -246,7 +264,7 @@ fun RegistrationBody() {
                                 }
                             }
                         }else{
-
+                             Toast.makeText(context, message, Toast.LENGTH_LONG).show()
                         }
                     }
                 }

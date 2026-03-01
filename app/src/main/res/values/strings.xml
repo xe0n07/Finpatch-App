@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">myApp</string>
+    <string name="default_web_client_id">286476090040-6ipfcssdf8lc8eu4au2j4ocmfegrgt1u.apps.googleusercontent.com</string>
+    <string name="title_activity_nav_graph">NavGraph</string>
+    <string name="title_activity_landing_screen">LandingScreen</string>
+    <string name="title_activity_main">MainActivity</string>
 </resources>

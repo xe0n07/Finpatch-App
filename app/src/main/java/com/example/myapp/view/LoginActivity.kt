@@ -1,4 +1,4 @@
-package myApp.view
+package com.example.myapp.view
 
 import android.app.Activity
 import android.content.Context
@@ -84,7 +84,7 @@ fun LoginBody() {
         ) {
             Spacer(modifier = Modifier.height(40.dp))
             Image(
-                painter = painterResource(id = com.example.myapp.R.drawable.logo),
+                painter = painterResource(id = com.example.myapp.R.drawable.logo2),
                 contentDescription = "Finance Manager Logo",
                 modifier = Modifier.size(80.dp)
             )

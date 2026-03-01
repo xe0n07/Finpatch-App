@@ -1,65 +1,86 @@
-package myApp.viewmodel
+package com.example.myApp.viewmodel
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import com.example.finpatch.data.repo.UserRepo
+import com.example.myapp.model.UserModel
+import com.example.myapp.repository.UserRepoImpl
 
-import myApp.model.UserModel
-import myApp.repository.UserRepo
 
-
-
-class UserViewModel (val repo: UserRepo) : ViewModel(){
-    fun login(email: String, password: String,
-              callback: (Boolean, String) -> Unit) {
-        repo.login(email, password, callback)
+class UserViewModelFactory : ViewModelProvider.Factory {
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        return UserViewModel(UserRepoImpl()) as T
     }
+}
 
-    fun register(email: String, password: String,
-                 callback: (Boolean, String, String) -> Unit) {
-        repo.register(email, password, callback)
-    }
 
-    fun addUserToDatabase(userId: String, model: UserModel,
-                          callback: (Boolean, String) -> Unit) {
-        repo.addUserToDatabase(userId, model, callback)
-    }
+class UserViewModel(private val repo: UserRepo) : ViewModel() {
 
-    fun forgetPassword(email: String, callback:(Boolean, String) -> Unit) {
-        repo.forgetPassword(email, callback)
-    }
-    fun deleteAccount(userId: String, password: String,
-                      callback: (Boolean, String) -> Unit) {
-        repo.deleteAccount(userId, password, callback)
-    }
+    private val _user = MutableLiveData<UserModel?>()
+    val user: MutableLiveData<UserModel?> get() = _user
 
-    fun editProfile(userId: String, model: UserModel,
-                    callback: (Boolean, String) -> Unit) {
-        repo.editProfile(userId, model, callback)
-    }
-    //getters for both get functions
-    private val _users = MutableLiveData<UserModel?>()
-    val users : MutableLiveData<UserModel?>
-        get() = _users
+    private val _allUsers = MutableLiveData<List<UserModel>?>()
+    val allUsers: MutableLiveData<List<UserModel>?> get() = _allUsers
 
-    private val _allusers = MutableLiveData<List<UserModel>?>()
-    val allUsers : MutableLiveData<List<UserModel>?>
-        get() = _allusers
+
+    fun login(
+        email: String,
+        password: String,
+        callback: (Boolean, String) -> Unit
+    ) = repo.login(email, password, callback)
+
+    fun register(
+        email: String,
+        password: String,
+        callback: (Boolean, String, String) -> Unit
+    ) = repo.register(email, password, callback)
+
+    /**
+     * Sign in or register with a Google account.
+     * Passes the LandingScreen choices ([username], [currency]) so they can be
+     * persisted for brand-new users.
+     */
+    fun signInWithGoogle(
+        idToken: String,
+        username: String,
+        currency: String,
+        callback: (Boolean, String) -> Unit
+    ) = repo.signInWithGoogle(idToken, username, currency, callback)
+
+    fun forgetPassword(
+        email: String,
+        callback: (Boolean, String) -> Unit
+    ) = repo.forgetPassword(email, callback)
+
+    fun deleteAccount(
+        userId: String,
+        password: String,
+        callback: (Boolean, String) -> Unit
+    ) = repo.deleteAccount(userId, password, callback)
+
+    fun addUserToDatabase(
+        userId: String,
+        model: UserModel,
+        callback: (Boolean, String) -> Unit
+    ) = repo.addUserToDatabase(userId, model, callback)
+
+    fun editProfile(
+        userId: String,
+        model: UserModel,
+        callback: (Boolean, String) -> Unit
+    ) = repo.editProfile(userId, model, callback)
 
     fun getUserById(userId: String) {
-            repo.getUserById(userId){
-                success,msg,data-> // success is bool(true/false), msg is the text, data is the error message or the provided data
-                if(success){
-                    _users.postValue(data)
-                }
-            }
-
+        repo.getUserById(userId) { success, _, data ->
+            if (success) _user.postValue(data)
+        }
     }
+
     fun getAllUser() {
-        repo.getAllUser {
-            success,msg,data->
-            if(success){
-                _allusers.postValue(data)
-            }
+        repo.getAllUser { success, _, data ->
+            if (success) _allUsers.postValue(data)
         }
     }
 }

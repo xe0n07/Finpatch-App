@@ -1,4 +1,4 @@
-package myApp.view
+package com.example.myapp.view
 
 import android.os.Bundle
 import android.widget.Toast
@@ -73,7 +73,7 @@ fun forgetPassword() {
         ) {
             Spacer(modifier = Modifier.height(40.dp))
             Image(
-                painter = painterResource(id = com.example.myapp.R.drawable.logo),
+                painter = painterResource(id = com.example.myapp.R.drawable.logo2),
                 contentDescription = "Finance Manager Logo",
                 modifier = Modifier.size(80.dp)
             )
