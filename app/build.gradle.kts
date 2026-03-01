@@ -47,18 +47,23 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
-    implementation("androidx.navigation:navigation-compose:2.9.7")
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+
+    // Navigation
+    implementation("androidx.navigation:navigation-compose:2.8.5")
 
     // Firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
     implementation(libs.firebase.database)
 
-    // Google Sign-In  ← ADDED: resolves GoogleSignIn, GoogleSignInClient, GoogleSignInAccount
-    implementation("com.google.android.gms:play-services-auth:21.5.1")
-
+    // Google Sign-In — Credential Manager (modern, no deprecation warnings)
+    // GetSignInWithGoogleOption lives in googleid:1.1.1 — shows full account picker sheet
+    implementation("androidx.credentials:credentials:1.3.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+    implementation("androidx.compose.material:material-icons-extended")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
