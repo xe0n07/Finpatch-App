@@ -1,9 +1,5 @@
 package com.example.myapp.view
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
@@ -22,55 +18,43 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
 data class Currency(val code: String, val symbol: String, val name: String, val flag: String)
-class LandingScreen(onProceed: Function<Unit>) : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
 
-        setContent {
-            MaterialTheme {
-                LandingScreenBody { username, currency ->
-                    // TODO: Navigate to next screen
-                    // Example:
-                    // startActivity(Intent(this, HomeActivity::class.java))
-                }
-            }
-        }
-    }
-}
 val CURRENCIES = listOf(
-    Currency("USD", "$",  "US Dollar",        "🇺🇸"),
-    Currency("EUR", "€",  "Euro",             "🇪🇺"),
-    Currency("GBP", "£",  "British Pound",    "🇬🇧"),
-    Currency("JPY", "¥",  "Japanese Yen",     "🇯🇵"),
-    Currency("INR", "₹",  "Indian Rupee",     "🇮🇳"),
-    Currency("NPR", "Rs", "Nepali Rupee",     "🇳🇵"),
-    Currency("CAD", "C$", "Canadian Dollar",  "🇨🇦"),
-    Currency("AUD", "A$", "Australian Dollar","🇦🇺"),
-    Currency("CHF", "Fr", "Swiss Franc",      "🇨🇭"),
-    Currency("CNY", "¥",  "Chinese Yuan",     "🇨🇳"),
-    Currency("SGD", "S$", "Singapore Dollar", "🇸🇬"),
-    Currency("AED", "د.إ","UAE Dirham",       "🇦🇪"),
+    Currency("USD", "$",   "US Dollar",         "🇺🇸"),
+    Currency("EUR", "€",   "Euro",              "🇪🇺"),
+    Currency("GBP", "£",   "British Pound",     "🇬🇧"),
+    Currency("JPY", "¥",   "Japanese Yen",      "🇯🇵"),
+    Currency("INR", "₹",   "Indian Rupee",      "🇮🇳"),
+    Currency("NPR", "Rs",  "Nepali Rupee",      "🇳🇵"),
+    Currency("CAD", "C$",  "Canadian Dollar",   "🇨🇦"),
+    Currency("AUD", "A$",  "Australian Dollar", "🇦🇺"),
+    Currency("CHF", "Fr",  "Swiss Franc",       "🇨🇭"),
+    Currency("CNY", "¥",   "Chinese Yuan",      "🇨🇳"),
+    Currency("SGD", "S$",  "Singapore Dollar",  "🇸🇬"),
+    Currency("AED", "د.إ", "UAE Dirham",        "🇦🇪"),
 )
 
 // ─── Screen ──────────────────────────────────────────────────────────────────
 
+/**
+ * Onboarding screen: collect username + preferred currency.
+ * Called directly from NavGraph — NOT an Activity.
+ */
 @Composable
-fun LandingScreenBody(
+fun LandingScreen(
     onProceed: (username: String, currency: Currency) -> Unit
 ) {
-    var username by remember { mutableStateOf("") }
+    var username         by remember { mutableStateOf("") }
     var selectedCurrency by remember { mutableStateOf<Currency?>(null) }
-    var usernameError by remember { mutableStateOf<String?>(null) }
-    var currencyError by remember { mutableStateOf(false) }
+    var usernameError    by remember { mutableStateOf<String?>(null) }
+    var currencyError    by remember { mutableStateOf(false) }
+    var step             by remember { mutableStateOf(0) }
 
-    // Animated gradient offset for background
     val infiniteTransition = rememberInfiniteTransition(label = "bg")
     val gradientShift by infiniteTransition.animateFloat(
         initialValue = 0f, targetValue = 1f,
@@ -80,15 +64,11 @@ fun LandingScreenBody(
         ), label = "gradientShift"
     )
 
-    // Step animation: 0 = username, 1 = currency
-    var step by remember { mutableStateOf(0) }
-
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFF0B0F1A))
     ) {
-        // Animated background blobs
         Canvas(modifier = Modifier.fillMaxSize()) {
             val w = size.width; val h = size.height
             drawCircle(
@@ -119,7 +99,7 @@ fun LandingScreenBody(
                 .padding(top = 64.dp, bottom = 40.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Logo area
+            // Logo
             Box(
                 modifier = Modifier
                     .size(64.dp)
@@ -139,19 +119,13 @@ fun LandingScreenBody(
             Text(
                 "Finpatch",
                 style = TextStyle(
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = Color.White,
-                    letterSpacing = (-1).sp
+                    fontSize = 32.sp, fontWeight = FontWeight.ExtraBold,
+                    color = Color.White, letterSpacing = (-1).sp
                 )
             )
             Text(
                 "Your personal finance hub",
-                style = TextStyle(
-                    fontSize = 14.sp,
-                    color = Color(0xFF6B7585),
-                    letterSpacing = 0.5.sp
-                )
+                style = TextStyle(fontSize = 14.sp, color = Color(0xFF6B7585), letterSpacing = 0.5.sp)
             )
 
             Spacer(Modifier.height(48.dp))
@@ -164,8 +138,7 @@ fun LandingScreenBody(
                 StepDot(active = step == 0, done = step > 0, label = "1")
                 Box(
                     modifier = Modifier
-                        .width(40.dp)
-                        .height(2.dp)
+                        .width(40.dp).height(2.dp)
                         .background(
                             if (step > 0) Color(0xFF3B82F6) else Color(0xFF252A36),
                             RoundedCornerShape(1.dp)
@@ -176,7 +149,7 @@ fun LandingScreenBody(
 
             Spacer(Modifier.height(36.dp))
 
-            // ── STEP 0: Username ──────────────────────────────────────────
+            // ── STEP 0: Username ──────────────────────────────────────────────
             AnimatedVisibility(
                 visible = step == 0,
                 enter = fadeIn() + slideInVertically { 30 },
@@ -186,42 +159,35 @@ fun LandingScreenBody(
                     Text(
                         "What should we call you?",
                         style = TextStyle(
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White,
-                            textAlign = TextAlign.Center
+                            fontSize = 22.sp, fontWeight = FontWeight.Bold,
+                            color = Color.White, textAlign = TextAlign.Center
                         )
                     )
                     Spacer(Modifier.height(8.dp))
                     Text(
                         "This will be your display name inside Finpatch.",
-                        style = TextStyle(
-                            fontSize = 13.sp,
-                            color = Color(0xFF6B7585),
-                            textAlign = TextAlign.Center
-                        )
+                        style = TextStyle(fontSize = 13.sp, color = Color(0xFF6B7585), textAlign = TextAlign.Center)
                     )
                     Spacer(Modifier.height(28.dp))
 
                     OutlinedTextField(
                         value = username,
-                        onValueChange = {
-                            username = it
-                            usernameError = null
-                        },
+                        onValueChange = { username = it; usernameError = null },
                         label = { Text("Username") },
-                        placeholder = { Text("e.g. alex_finance") },
+                        placeholder = { Text("e.g. alex_finance", color = Color(0xFF3A4252)) },
                         singleLine = true,
                         isError = usernameError != null,
-                        supportingText = usernameError?.let { { Text(it, color = Color(0xFFEF4444)) } },
+                        supportingText = usernameError?.let { msg -> { Text(msg, color = Color(0xFFEF4444)) } },
                         keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.None),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = Color(0xFF3B82F6),
                             unfocusedBorderColor = Color(0xFF252A36),
+                            errorBorderColor = Color(0xFFEF4444),
                             focusedLabelColor = Color(0xFF3B82F6),
                             unfocusedLabelColor = Color(0xFF6B7585),
                             focusedContainerColor = Color(0xFF161921),
                             unfocusedContainerColor = Color(0xFF161921),
+                            errorContainerColor = Color(0xFF161921),
                             cursorColor = Color(0xFF3B82F6),
                             focusedTextColor = Color.White,
                             unfocusedTextColor = Color.White,
@@ -232,9 +198,9 @@ fun LandingScreenBody(
 
                     Spacer(Modifier.height(28.dp))
 
-                    PrimaryButton(text = "Continue →") {
+                    LandingPrimaryButton("Continue →") {
                         when {
-                            username.isBlank() -> usernameError = "Username can't be empty"
+                            username.isBlank()  -> usernameError = "Username can't be empty"
                             username.length < 3 -> usernameError = "At least 3 characters"
                             username.length > 20 -> usernameError = "Max 20 characters"
                             !username.matches(Regex("^[a-zA-Z0-9._]+$")) ->
@@ -245,7 +211,7 @@ fun LandingScreenBody(
                 }
             }
 
-            // ── STEP 1: Currency ──────────────────────────────────────────
+            // ── STEP 1: Currency ──────────────────────────────────────────────
             AnimatedVisibility(
                 visible = step == 1,
                 enter = fadeIn() + slideInVertically { 30 },
@@ -255,20 +221,14 @@ fun LandingScreenBody(
                     Text(
                         "Pick your currency",
                         style = TextStyle(
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White,
-                            textAlign = TextAlign.Center
+                            fontSize = 22.sp, fontWeight = FontWeight.Bold,
+                            color = Color.White, textAlign = TextAlign.Center
                         )
                     )
                     Spacer(Modifier.height(8.dp))
                     Text(
                         "All transactions and analytics will use this currency.",
-                        style = TextStyle(
-                            fontSize = 13.sp,
-                            color = Color(0xFF6B7585),
-                            textAlign = TextAlign.Center
-                        )
+                        style = TextStyle(fontSize = 13.sp, color = Color(0xFF6B7585), textAlign = TextAlign.Center)
                     )
 
                     if (currencyError) {
@@ -285,18 +245,13 @@ fun LandingScreenBody(
                         columns = GridCells.Fixed(3),
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                         verticalArrangement = Arrangement.spacedBy(10.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(max = 400.dp) // allow scroll in parent
+                        modifier = Modifier.fillMaxWidth().heightIn(max = 400.dp)
                     ) {
                         items(CURRENCIES) { currency ->
                             CurrencyCard(
                                 currency = currency,
                                 selected = selectedCurrency == currency,
-                                onClick = {
-                                    selectedCurrency = currency
-                                    currencyError = false
-                                }
+                                onClick = { selectedCurrency = currency; currencyError = false }
                             )
                         }
                     }
@@ -313,18 +268,14 @@ fun LandingScreenBody(
                             shape = RoundedCornerShape(12.dp),
                             border = BorderStroke(1.dp, Color(0xFF252A36)),
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF9AA5B8))
-                        ) {
-                            Text("← Back")
-                        }
-                        PrimaryButton(
+                        ) { Text("← Back") }
+
+                        LandingPrimaryButton(
                             text = "Let's Go 🚀",
                             modifier = Modifier.weight(2f)
                         ) {
-                            if (selectedCurrency == null) {
-                                currencyError = true
-                            } else {
-                                onProceed(username.trim(), selectedCurrency!!)
-                            }
+                            if (selectedCurrency == null) currencyError = true
+                            else onProceed(username.trim(), selectedCurrency!!)
                         }
                     }
                 }
@@ -358,8 +309,7 @@ private fun StepDot(active: Boolean, done: Boolean, label: String) {
         Text(
             if (done) "✓" else label,
             style = TextStyle(
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
+                fontSize = 12.sp, fontWeight = FontWeight.Bold,
                 color = if (active || done) Color.White else Color(0xFF6B7585)
             )
         )
@@ -373,7 +323,6 @@ private fun CurrencyCard(currency: Currency, selected: Boolean, onClick: () -> U
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
         label = "scale"
     )
-
     Box(
         modifier = Modifier
             .scale(scale)
@@ -396,30 +345,25 @@ private fun CurrencyCard(currency: Currency, selected: Boolean, onClick: () -> U
             Text(
                 currency.code,
                 style = TextStyle(
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp, fontWeight = FontWeight.Bold,
                     color = if (selected) Color(0xFF3B82F6) else Color.White
                 )
             )
-            Text(
-                currency.symbol,
-                style = TextStyle(fontSize = 11.sp, color = Color(0xFF6B7585))
-            )
+            Text(currency.symbol, style = TextStyle(fontSize = 11.sp, color = Color(0xFF6B7585)))
         }
     }
 }
 
+// Renamed to LandingPrimaryButton to avoid clash with AuthScreen's PrimaryButton
 @Composable
-fun PrimaryButton(
+fun LandingPrimaryButton(
     text: String,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
     Button(
         onClick = onClick,
-        modifier = modifier
-            .fillMaxWidth()
-            .height(52.dp),
+        modifier = modifier.fillMaxWidth().height(52.dp),
         shape = RoundedCornerShape(12.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = Color(0xFF3B82F6),
@@ -427,20 +371,6 @@ fun PrimaryButton(
         ),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
     ) {
-        Text(
-            text,
-            style = TextStyle(
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 0.3.sp
-            )
-        )
-    }
-}
-@Preview(showBackground = true)
-@Composable
-fun LandingPreview() {
-    MaterialTheme {
-        LandingScreenBody { _, _ -> }
+        Text(text, style = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.3.sp))
     }
 }
