@@ -1,34 +1,41 @@
 {
   "project_info": {
-    "project_number": "1022249552446",
-    "firebase_url": "https://myapp-270f6-default-rtdb.firebaseio.com",
-    "project_id": "myapp-270f6",
-    "storage_bucket": "myapp-270f6.firebasestorage.app"
+    "project_number": "286476090040",
+    "project_id": "finpatch-ebc9c",
+    "storage_bucket": "finpatch-ebc9c.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1022249552446:android:6ee00432298007b1079f6f",
+        "mobilesdk_app_id": "1:286476090040:android:d84b3d98fcf8133351924d",
         "android_client_info": {
           "package_name": "com.example.myapp"
         }
       },
       "oauth_client": [
         {
-          "client_id": "1022249552446-8gunji76neiqcnekll9lu20u8npr530o.apps.googleusercontent.com",
+          "client_id": "286476090040-9kf004a23fonpn8c2s192gur15mlvjds.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.myapp",
+            "certificate_hash": "5da0a625e52126670e0206fd0dcdeccf918485b3"
+          }
+        },
+        {
+          "client_id": "286476090040-6ipfcssdf8lc8eu4au2j4ocmfegrgt1u.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAUn5BlDa0eNLOK3AtG1-SCWR1I5lxlYvU"
+          "current_key": "AIzaSyA6hX5OkdcXXnktuZMVHAwu067pekK6ESo"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "1022249552446-8gunji76neiqcnekll9lu20u8npr530o.apps.googleusercontent.com",
+              "client_id": "286476090040-6ipfcssdf8lc8eu4au2j4ocmfegrgt1u.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
