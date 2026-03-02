@@ -1,4 +1,4 @@
-package com.example.myApp.viewmodel
+package com.example.myapp.viewmodel
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
