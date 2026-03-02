@@ -15,7 +15,6 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -50,6 +49,9 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
 
+    // Extended Material Icons (adds BarChart, Receipt, Wallet, TrendingUp, etc.)
+    implementation("androidx.compose.material:material-icons-extended")
+
     // Navigation
     implementation("androidx.navigation:navigation-compose:2.8.5")
 
@@ -58,12 +60,6 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.firebase.database)
 
-    // Google Sign-In — Credential Manager (modern, no deprecation warnings)
-    // GetSignInWithGoogleOption lives in googleid:1.1.1 — shows full account picker sheet
-    implementation("androidx.credentials:credentials:1.3.0")
-    implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
-    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
-    implementation("androidx.compose.material:material-icons-extended")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
