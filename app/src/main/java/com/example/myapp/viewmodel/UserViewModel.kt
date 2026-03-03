@@ -3,7 +3,7 @@ package com.example.myapp.viewmodel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.finpatch.data.repo.UserRepo
+import com.example.myapp.repository.UserRepo
 import com.example.myapp.model.UserModel
 import com.example.myapp.repository.UserRepoImpl
 
@@ -37,17 +37,6 @@ class UserViewModel(private val repo: UserRepo) : ViewModel() {
         callback: (Boolean, String, String) -> Unit
     ) = repo.register(email, password, callback)
 
-    /**
-     * Sign in or register with a Google account.
-     * Passes the LandingScreen choices ([username], [currency]) so they can be
-     * persisted for brand-new users.
-     */
-    fun signInWithGoogle(
-        idToken: String,
-        username: String,
-        currency: String,
-        callback: (Boolean, String) -> Unit
-    ) = repo.signInWithGoogle(idToken, username, currency, callback)
 
     fun forgetPassword(
         email: String,

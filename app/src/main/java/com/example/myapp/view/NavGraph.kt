@@ -9,8 +9,6 @@ import androidx.navigation.navArgument
 import java.net.URLDecoder
 import java.net.URLEncoder
 
-// ─── Routes ──────────────────────────────────────────────────────────────────
-
 object Routes {
     const val LANDING   = "landing"
     const val AUTH      = "auth/{username}/{currency}"
@@ -22,8 +20,6 @@ object Routes {
         return "auth/$u/$c"
     }
 }
-
-// ─── NavGraph ─────────────────────────────────────────────────────────────────
 
 @Composable
 fun FinpatchNavGraph(startDestination: String = Routes.LANDING) {

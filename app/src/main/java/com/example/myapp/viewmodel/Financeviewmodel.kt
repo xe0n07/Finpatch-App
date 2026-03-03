@@ -37,9 +37,7 @@ class FinanceViewModel : ViewModel() {
     private val _isLoading    = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading
 
-    init {
-        if (uid.isNotEmpty()) startListeners()
-    }
+    init { if (uid.isNotEmpty()) startListeners() }
 
     fun startListeners() {
         listenProfile()
@@ -70,6 +68,10 @@ class FinanceViewModel : ViewModel() {
         listenerRegistry.add(ListenerEntry(r, listener))
     }
 
+    /**
+     * Updates currency in Firebase. The real-time listener will automatically
+     * re-fire and update _profile, so all fmt() calls in the UI refresh instantly.
+     */
     private fun listenTransactions() {
         val listener = object : ValueEventListener {
             override fun onDataChange(snap: DataSnapshot) {
@@ -92,12 +94,8 @@ class FinanceViewModel : ViewModel() {
         val data = tx.copy(id = key, timestamp = System.currentTimeMillis())
         ref("transactions/$key").setValue(data)
             .addOnSuccessListener {
-                // Update account balance atomically
                 if (tx.accountId.isNotEmpty()) {
-                    adjustAccountBalance(
-                        tx.accountId,
-                        if (tx.type == "income") tx.amount else -tx.amount
-                    )
+                    adjustAccountBalance(tx.accountId, if (tx.type == "income") tx.amount else -tx.amount)
                 }
                 onDone(true, "")
             }
@@ -107,14 +105,9 @@ class FinanceViewModel : ViewModel() {
     fun deleteTransaction(tx: FinanceTransaction) {
         ref("transactions/${tx.id}").removeValue()
         if (tx.accountId.isNotEmpty()) {
-            adjustAccountBalance(
-                tx.accountId,
-                if (tx.type == "income") -tx.amount else tx.amount
-            )
+            adjustAccountBalance(tx.accountId, if (tx.type == "income") -tx.amount else tx.amount)
         }
     }
-
-    // ── Accounts ──────────────────────────────────────────────────────────────
 
     private fun listenAccounts() {
         val listener = object : ValueEventListener {
@@ -135,17 +128,13 @@ class FinanceViewModel : ViewModel() {
 
     fun addAccount(acc: Account, onDone: (Boolean, String) -> Unit) {
         val key  = ref("accounts").push().key ?: return onDone(false, "Push failed")
-        val data = acc.copy(id = key)
-        ref("accounts/$key").setValue(data)
+        ref("accounts/$key").setValue(acc.copy(id = key))
             .addOnSuccessListener { onDone(true, "") }
             .addOnFailureListener { e -> onDone(false, e.message ?: "Error") }
     }
 
-    fun deleteAccount(accountId: String) {
-        ref("accounts/$accountId").removeValue()
-    }
+    fun deleteAccount(accountId: String) { ref("accounts/$accountId").removeValue() }
 
-    /** Read-then-write account balance (simple, avoids naming clash with Firebase Transaction) */
     private fun adjustAccountBalance(accountId: String, delta: Double) {
         val balRef = ref("accounts/$accountId/balance")
         balRef.get().addOnSuccessListener { snap ->
@@ -153,8 +142,6 @@ class FinanceViewModel : ViewModel() {
             balRef.setValue(current + delta)
         }
     }
-
-    // ── Budgets ───────────────────────────────────────────────────────────────
 
     private fun listenBudgets() {
         val listener = object : ValueEventListener {
@@ -174,26 +161,20 @@ class FinanceViewModel : ViewModel() {
     }
 
     fun addBudget(budget: Budget, onDone: (Boolean, String) -> Unit) {
-        // Check if budget for this category+month already exists
         val existing = _budgets.value.find {
             it.category == budget.category && it.month == budget.month
         }
         if (existing != null) {
-            onDone(false, "Budget for ${budget.category} this month already exists.")
-            return
+            onDone(false, "Budget for ${budget.category} this month already exists."); return
         }
         val key  = ref("budgets").push().key ?: return onDone(false, "Push failed")
-        val data = budget.copy(id = key)
-        ref("budgets/$key").setValue(data)
+        ref("budgets/$key").setValue(budget.copy(id = key))
             .addOnSuccessListener { onDone(true, "") }
             .addOnFailureListener { e -> onDone(false, e.message ?: "Error") }
     }
 
-    fun deleteBudget(budgetId: String) {
-        ref("budgets/$budgetId").removeValue()
-    }
+    fun deleteBudget(budgetId: String) { ref("budgets/$budgetId").removeValue() }
 
-    // ── Loans ─────────────────────────────────────────────────────────────────
 
     private fun listenLoans() {
         val listener = object : ValueEventListener {
@@ -214,39 +195,26 @@ class FinanceViewModel : ViewModel() {
 
     fun addLoan(loan: Loan, onDone: (Boolean, String) -> Unit) {
         val key  = ref("loans").push().key ?: return onDone(false, "Push failed")
-        val data = loan.copy(id = key)
-        ref("loans/$key").setValue(data)
+        ref("loans/$key").setValue(loan.copy(id = key))
             .addOnSuccessListener { onDone(true, "") }
             .addOnFailureListener { e -> onDone(false, e.message ?: "Error") }
     }
 
-    fun markLoanSettled(loanId: String) {
-        ref("loans/$loanId/isSettled").setValue(true)
-    }
-
-    fun deleteLoan(loanId: String) {
-        ref("loans/$loanId").removeValue()
-    }
-
-    // ── Computed helpers ──────────────────────────────────────────────────────
+    fun markLoanSettled(loanId: String) { ref("loans/$loanId/isSettled").setValue(true) }
+    fun deleteLoan(loanId: String)      { ref("loans/$loanId").removeValue() }
 
     fun totalBalance(): Double = _accounts.value.sumOf { it.balance }
 
     fun thisMonthIncome(): Double {
         val m = currentMonth()
-        return _transactions.value
-            .filter { it.type == "income" && it.date.startsWith(m) }
-            .sumOf { it.amount }
+        return _transactions.value.filter { it.type == "income" && it.date.startsWith(m) }.sumOf { it.amount }
     }
 
     fun thisMonthExpense(): Double {
         val m = currentMonth()
-        return _transactions.value
-            .filter { it.type == "expense" && it.date.startsWith(m) }
-            .sumOf { it.amount }
+        return _transactions.value.filter { it.type == "expense" && it.date.startsWith(m) }.sumOf { it.amount }
     }
 
-    /** Amount spent in a given category this month (for budget progress) */
     fun spentForCategory(category: String): Double {
         val m = currentMonth()
         return _transactions.value
@@ -254,25 +222,20 @@ class FinanceViewModel : ViewModel() {
             .sumOf { it.amount }
     }
 
-    /** Returns category → total expense this month */
     fun expensesByCategory(): Map<String, Double> {
         val m = currentMonth()
         return _transactions.value
             .filter { it.type == "expense" && it.date.startsWith(m) }
             .groupBy { it.category }
             .mapValues { (_, list) -> list.sumOf { it.amount } }
-            .toList()
-            .sortedByDescending { it.second }
-            .toMap()
+            .toList().sortedByDescending { it.second }.toMap()
     }
 
-    /** Returns last 6 months as List<Triple(label, income, expense)> */
     fun last6MonthsData(): List<Triple<String, Double, Double>> {
         val sdf   = SimpleDateFormat("yyyy-MM", Locale.getDefault())
         val label = SimpleDateFormat("MMM",     Locale.getDefault())
-        val cal   = Calendar.getInstance()
         return (5 downTo 0).map { offset ->
-            val c = Calendar.getInstance().also { it.add(Calendar.MONTH, -offset) }
+            val c   = Calendar.getInstance().also { it.add(Calendar.MONTH, -offset) }
             val key = sdf.format(c.time)
             val lbl = label.format(c.time)
             val inc = _transactions.value.filter { it.type == "income"  && it.date.startsWith(key) }.sumOf { it.amount }
@@ -281,18 +244,14 @@ class FinanceViewModel : ViewModel() {
         }
     }
 
-    fun currentMonth(): String = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(Date())
+    fun currentMonth(): String = SimpleDateFormat("yyyy-MM",    Locale.getDefault()).format(Date())
     fun currentDate():  String = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-
-    // ── Auth ──────────────────────────────────────────────────────────────────
 
     fun logout() {
         listenerRegistry.forEach { (r, l) -> r.removeEventListener(l) }
         listenerRegistry.clear()
         auth.signOut()
     }
-
-    // ── Cleanup ───────────────────────────────────────────────────────────────
 
     override fun onCleared() {
         super.onCleared()

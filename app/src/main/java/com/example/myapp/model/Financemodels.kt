@@ -1,7 +1,5 @@
 package com.example.myapp.model
 
-// ─── User Profile ─────────────────────────────────────────────────────────────
-
 data class UserProfile(
     val uid: String = "",
     val username: String = "",
@@ -10,11 +8,10 @@ data class UserProfile(
     val currencySymbol: String = "$"
 )
 
-// ─── Transaction ──────────────────────────────────────────────────────────────
 
 data class FinanceTransaction(
     val id: String = "",
-    val type: String = "expense",       // "income" | "expense"
+    val type: String = "expense",
     val title: String = "",
     val amount: Double = 0.0,
     val category: String = "Others",
@@ -25,8 +22,6 @@ data class FinanceTransaction(
     val timestamp: Long = 0L
 )
 
-// ─── Account ──────────────────────────────────────────────────────────────────
-
 data class Account(
     val id: String = "",
     val name: String = "",
@@ -34,16 +29,12 @@ data class Account(
     val balance: Double = 0.0
 )
 
-// ─── Budget ───────────────────────────────────────────────────────────────────
-
 data class Budget(
     val id: String = "",
     val category: String = "",
     val amount: Double = 0.0,
     val month: String = ""              // "yyyy-MM"
 )
-
-// ─── Loan ─────────────────────────────────────────────────────────────────────
 
 data class Loan(
     val id: String = "",
@@ -54,8 +45,6 @@ data class Loan(
     val dueDate: String = "",
     val isSettled: Boolean = false
 )
-
-// ─── Constants ────────────────────────────────────────────────────────────────
 
 val EXPENSE_CATEGORIES = listOf(
     "Bills", "Education", "Entertainment", "Food", "Groceries",

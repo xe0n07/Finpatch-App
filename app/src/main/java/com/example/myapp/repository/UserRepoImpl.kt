@@ -1,10 +1,9 @@
 package com.example.myapp.repository
 
 
-import com.example.finpatch.data.repo.UserRepo
 import com.example.myapp.model.UserModel
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -17,7 +16,7 @@ class UserRepoImpl : UserRepo {
     private val database: FirebaseDatabase = FirebaseDatabase.getInstance()
     private val ref: DatabaseReference = database.getReference("Users")
 
-    // ── Existing: Email / Password ────────────────────────────────────────────
+    // ── Email / Password Login ────────────────────────────────────────────────
 
     override fun login(
         email: String,
@@ -30,6 +29,8 @@ class UserRepoImpl : UserRepo {
                 else callback(false, it.exception?.message ?: "Login failed")
             }
     }
+
+    // ── Email / Password Register ─────────────────────────────────────────────
 
     override fun register(
         email: String,
@@ -45,6 +46,8 @@ class UserRepoImpl : UserRepo {
             }
     }
 
+    // ── Add User to Database ──────────────────────────────────────────────────
+
     override fun addUserToDatabase(
         userId: String,
         model: UserModel,
@@ -56,69 +59,10 @@ class UserRepoImpl : UserRepo {
         }
     }
 
-    // ── NEW: Google Sign-In ───────────────────────────────────────────────────
-
-    /**
-     * Authenticates with Firebase using a Google ID token, then either:
-     *  - Creates a new user record (first-time sign-in) using [username] and [currency]
-     *  - OR leaves the existing record untouched (returning user)
-     *
-     * @param idToken     The ID token from GoogleSignInAccount
-     * @param username    Display name chosen on LandingScreen
-     * @param currency    Currency code chosen on LandingScreen
-     * @param callback    (success, message)
-     */
-    override fun signInWithGoogle(
-        idToken: String,
-        username: String,
-        currency: String,
-        callback: (Boolean, String) -> Unit
-    ) {
-        val credential = GoogleAuthProvider.getCredential(idToken, null)
-        auth.signInWithCredential(credential)
-            .addOnCompleteListener { authTask ->
-                if (!authTask.isSuccessful) {
-                    callback(false, authTask.exception?.message ?: "Google auth failed")
-                    return@addOnCompleteListener
-                }
-
-                val firebaseUser = auth.currentUser ?: run {
-                    callback(false, "No user found after Google sign-in")
-                    return@addOnCompleteListener
-                }
-
-                val userId = firebaseUser.uid
-                val isNewUser = authTask.result?.additionalUserInfo?.isNewUser ?: false
-
-                if (isNewUser) {
-                    // ── First time: build UserModel and save ──────────────────
-                    val nameParts = (firebaseUser.displayName ?: "").split(" ", limit = 2)
-                    val model = UserModel(
-                        id = userId,
-                        firstName = nameParts.getOrElse(0) { username },
-                        lastName = nameParts.getOrElse(1) { "" },
-                        email = firebaseUser.email ?: "",
-                        gender = "",
-                        dob = "",
-                        username = username,
-                        currency = currency,
-                        profilePhotoUrl = firebaseUser.photoUrl?.toString() ?: ""
-                    )
-                    ref.child(userId).setValue(model).addOnCompleteListener { dbTask ->
-                        if (dbTask.isSuccessful) callback(true, "Account created successfully!")
-                        else callback(false, dbTask.exception?.message ?: "Failed to save user data")
-                    }
-                } else {
-                    // ── Returning user: don't overwrite, just sign in ─────────
-                    callback(true, "Welcome back!")
-                }
-            }
-    }
-
-    // ── Existing: Forget Password ─────────────────────────────────────────────
+    // ── Forget Password ───────────────────────────────────────────────────────
 
     override fun forgetPassword(email: String, callback: (Boolean, String) -> Unit) {
-        FirebaseAuth.getInstance().sendPasswordResetEmail(email)
+        auth.sendPasswordResetEmail(email)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful)
                     callback(true, "Password reset email sent to $email")
@@ -127,7 +71,7 @@ class UserRepoImpl : UserRepo {
             }
     }
 
-    // ── Existing: Delete Account (fixed from code review) ────────────────────
+    // ── Delete Account ────────────────────────────────────────────────────────
 
     override fun deleteAccount(
         userId: String,
@@ -138,17 +82,13 @@ class UserRepoImpl : UserRepo {
             callback(false, "No signed-in user"); return
         }
 
-        // For Google sign-in users, re-auth requires a fresh Google credential.
-        // Here we handle the email/password path; Google path should use
-        // reauthenticateWithCredential(GoogleAuthProvider.getCredential(...))
         val email = user.email ?: run {
             callback(false, "Cannot determine user email"); return
         }
 
-        val emailCredential = com.google.firebase.auth.EmailAuthProvider
-            .getCredential(email, password)
+        val credential = EmailAuthProvider.getCredential(email, password)
 
-        user.reauthenticate(emailCredential).addOnCompleteListener { reauth ->
+        user.reauthenticate(credential).addOnCompleteListener { reauth ->
             if (!reauth.isSuccessful) {
                 callback(false, "Incorrect password"); return@addOnCompleteListener
             }
@@ -165,7 +105,7 @@ class UserRepoImpl : UserRepo {
         }
     }
 
-    // ── Existing: Edit Profile ────────────────────────────────────────────────
+    // ── Edit Profile ──────────────────────────────────────────────────────────
 
     override fun editProfile(
         userId: String,
@@ -179,13 +119,12 @@ class UserRepoImpl : UserRepo {
             }
     }
 
-    // ── Existing: Get User ────────────────────────────────────────────────────
+    // ── Get User by ID ────────────────────────────────────────────────────────
 
     override fun getUserById(
         userId: String,
         callback: (Boolean, String, UserModel?) -> Unit
     ) {
-        // Changed to singleValueEvent (no persistent listener leak — see code review)
         ref.child(userId).addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val user = snapshot.getValue(UserModel::class.java)
@@ -197,6 +136,8 @@ class UserRepoImpl : UserRepo {
             }
         })
     }
+
+    // ── Get All Users ─────────────────────────────────────────────────────────
 
     override fun getAllUser(callback: (Boolean, String, List<UserModel>) -> Unit) {
         ref.addListenerForSingleValueEvent(object : ValueEventListener {

@@ -1,4 +1,4 @@
-package com.example.finpatch.data.repo
+package com.example.myapp.repository
 
 import com.example.myapp.model.UserModel
 
@@ -13,17 +13,6 @@ interface UserRepo {
 
     fun addUserToDatabase(userId: String, model: UserModel,
                           callback: (Boolean, String) -> Unit)
-
-    /**
-     * Authenticate with Google, then create or retrieve the user in Firebase DB.
-     * On first sign-in, saves [username] and [currency] chosen on LandingScreen.
-     */
-    fun signInWithGoogle(
-        idToken: String,
-        username: String,
-        currency: String,
-        callback: (Boolean, String) -> Unit
-    )
 
     fun forgetPassword(email: String, callback: (Boolean, String) -> Unit)
 
